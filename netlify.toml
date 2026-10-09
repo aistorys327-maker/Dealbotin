@@ -1,0 +1,19 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Scheduled function: Runs automated Indian deals bot every 30 minutes
+[functions."scheduled-deals"]
+  schedule = "*/30 * * * *"
+
+# Redirect API calls to the consolidated api.js Netlify Function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# Catch-all fallback to index.html for single-page dashboard routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

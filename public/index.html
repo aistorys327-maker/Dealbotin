@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>DealsBot India - Automated Affiliate Deals & Admin Dashboard</title>
+    <meta name="description" content="Automated Indian deals bot for Amazon & Flipkart with Telegram & Facebook posting and mobile admin dashboard." />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-content">
+        <div class="brand">
+          <div class="brand-icon">⚡</div>
+          <div>
+            <span>DealsBot</span>
+            <span style="color: #f97316; font-size: 0.85em;">IN</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions" id="topbarActions" style="display: none;">
+          <button id="btnRefresh" class="btn btn-secondary btn-sm" title="Refresh Dashboard">
+            🔄 Refresh
+          </button>
+          <button id="btnLogout" class="btn btn-ghost btn-sm" title="Log Out">
+            🚪 Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- 1. LOGIN SCREEN -->
+      <section id="loginScreen" class="login-wrap">
+        <div class="login-card">
+          <div class="login-icon">🔐</div>
+          <h1 class="login-title">Admin Dashboard</h1>
+          <p class="login-subtitle">Enter your secret ADMIN_PASSWORD to manage the deals bot and view logs.</p>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="adminPasswordInput" class="form-label">Admin Password</label>
+              <input
+                type="password"
+                id="adminPasswordInput"
+                class="input-text"
+                placeholder="Enter password..."
+                autocomplete="current-password"
+                required
+              />
+              <div class="form-hint">Stored strictly in your browser's sessionStorage.</div>
+            </div>
+
+            <div id="loginError" style="color: var(--accent-danger); font-size: 0.82rem; margin-bottom: 1rem; display: none;"></div>
+
+            <button type="submit" id="btnLogin" class="btn btn-primary btn-block">
+              Unlock Dashboard
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 2. MAIN DASHBOARD SCREEN -->
+      <section id="dashboardScreen" style="display: none;">
+        <!-- Service Health Pills -->
+        <div class="service-pills" id="servicePills">
+          <div class="service-pill" id="pillTelegram">
+            <span class="status-dot"></span> Telegram Bot
+          </div>
+          <div class="service-pill" id="pillAmazon">
+            <span class="status-dot"></span> Amazon PA-API
+          </div>
+          <div class="service-pill" id="pillFlipkart">
+            <span class="status-dot"></span> Flipkart/Shopsy
+          </div>
+          <div class="service-pill" id="pillGemini">
+            <span class="status-dot"></span> Gemini AI
+          </div>
+          <div class="service-pill" id="pillFacebook">
+            <span class="status-dot"></span> Facebook Page
+          </div>
+        </div>
+
+        <!-- Quick Action Touch Buttons -->
+        <div class="quick-actions">
+          <button id="btnRunNow" class="btn btn-deal">
+            <span>⚡ Run Deals Engine Now</span>
+          </button>
+          <button id="btnTestTelegram" class="btn btn-secondary">
+            <span>📲 Test Telegram Channel</span>
+          </button>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Last Run</div>
+            <div class="metric-value" id="metricLastRunStatus">-</div>
+            <div class="metric-sub" id="metricLastRunTime">Never</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Deals Posted</div>
+            <div class="metric-value" id="metricTotalPosted">0</div>
+            <div class="metric-sub" id="metricLastPostTime">Last: None</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Min Discount</div>
+            <div class="metric-value" id="metricMinDiscount">40%</div>
+            <div class="metric-sub">Filter threshold</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Quiet Hours</div>
+            <div class="metric-value" id="metricQuietHours">Off</div>
+            <div class="metric-sub" id="metricCurrentIST">- IST</div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="settings">⚙️ Settings</button>
+          <button class="tab-btn" data-tab="history">🛍️ Posted Deals (<span id="countHistory">0</span>)</button>
+          <button class="tab-btn" data-tab="logs">📜 Run Logs</button>
+        </div>
+
+        <!-- Tab 1: Settings Form -->
+        <div id="tabSettings" class="tab-panel active">
+          <div class="card">
+            <div class="card-title">
+              <span>Engine Configuration</span>
+              <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-muted);">Stored in Netlify Blobs</span>
+            </div>
+
+            <form id="settingsForm">
+              <div class="form-group">
+                <label for="settingKeywords" class="form-label">Search Keywords / Categories</label>
+                <input
+                  type="text"
+                  id="settingKeywords"
+                  class="input-text"
+                  placeholder="smartphone, headphones, smartwatch, laptop, sneakers..."
+                  required
+                />
+                <div class="form-hint">Separate keywords by commas. Used by Amazon & Flipkart APIs to find matching deals.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="settingMinDiscount" class="form-label">
+                  Minimum Discount (%): <b id="discountLabel">40%</b>
+                </label>
+                <input
+                  type="range"
+                  id="settingMinDiscount"
+                  min="10"
+                  max="90"
+                  step="5"
+                  value="40"
+                  style="width: 100%; accent-color: #f97316;"
+                />
+                <div class="form-hint">Deals below this discount percentage will be automatically skipped.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="settingMaxPosts" class="form-label">Max Posts Per Run (Scheduled every 30 mins)</label>
+                <select id="settingMaxPosts" class="input-select">
+                  <option value="1">1 deal</option>
+                  <option value="2">2 deals</option>
+                  <option value="3">3 deals</option>
+                  <option value="5" selected>5 deals (Recommended)</option>
+                  <option value="8">8 deals</option>
+                  <option value="10">10 deals</option>
+                </select>
+                <div class="form-hint">Protects channel subscribers from excessive notification flood.</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="settingQuietEnabled" style="width: 18px; height: 18px; accent-color: #3b82f6;" />
+                  <span>Enable Quiet Hours (IST)</span>
+                </label>
+                <div class="form-hint">Pauses scheduled posting during night hours in India. (Default: 11 PM to 7 AM IST).</div>
+
+                <div id="quietHoursInputs" style="display: none; margin-top: 0.75rem; gap: 0.5rem; grid-template-columns: 1fr 1fr;">
+                  <div>
+                    <label class="form-label" style="font-size: 0.75rem;">Start Hour (IST)</label>
+                    <select id="settingQuietStart" class="input-select">
+                      <option value="21">9:00 PM (21:00)</option>
+                      <option value="22">10:00 PM (22:00)</option>
+                      <option value="23" selected>11:00 PM (23:00)</option>
+                      <option value="0">12:00 AM (00:00)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" style="font-size: 0.75rem;">End Hour (IST)</label>
+                    <select id="settingQuietEnd" class="input-select">
+                      <option value="6">6:00 AM (06:00)</option>
+                      <option value="7" selected>7:00 AM (07:00)</option>
+                      <option value="8">8:00 AM (08:00)</option>
+                      <option value="9">9:00 AM (09:00)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" id="btnSaveSettings" class="btn btn-primary btn-block">
+                💾 Save Configuration
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tab 2: Deals History -->
+        <div id="tabHistory" class="tab-panel">
+          <div class="card">
+            <div class="card-title">
+              <span>Recently Broadcast Deals</span>
+              <button id="btnRefreshHistory" class="btn btn-ghost btn-sm">Refresh List</button>
+            </div>
+            <div id="dealsContainer" class="deals-list">
+              <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <p>No deals posted yet. Click <b>Run Deals Engine Now</b> to trigger your first deal run!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Logs -->
+        <div id="tabLogs" class="tab-panel">
+          <div class="card">
+            <div class="card-title">
+              <span>Engine Execution History</span>
+              <button id="btnRefreshLogs" class="btn btn-ghost btn-sm">Refresh Logs</button>
+            </div>
+            <div id="logsTerminal" class="logs-terminal">
+              <div class="empty-state">
+                <div class="empty-icon">📜</div>
+                <p>No run logs recorded yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Run Modal -->
+    <div id="runModal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <h3 id="runModalTitle" style="margin-bottom: 0.75rem; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span class="loading-spinner"></span>
+          <span>Running Deals Engine...</span>
+        </h3>
+        <p id="runModalDesc" style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+          Scraping Amazon.in & Flipkart, filtering discounts, and preparing broadcasts...
+        </p>
+
+        <div id="runModalContent" style="background: #080d1a; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; font-family: monospace; font-size: 0.8rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem; color: #a5b4fc;">
+        </div>
+
+        <button id="btnCloseModal" class="btn btn-secondary btn-block" style="display: none;">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

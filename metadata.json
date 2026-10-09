@@ -1,0 +1,6 @@
+{
+  "name": "DealsBot India - Automated Affiliate Deals & Admin Dashboard",
+  "description": "Automated deals bot for Amazon India & Flipkart with Telegram & Facebook posting, Netlify scheduled functions, Netlify Blobs storage, and mobile-friendly admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
